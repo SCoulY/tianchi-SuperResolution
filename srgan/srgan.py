@@ -187,5 +187,6 @@ def main():
             torch.save(discriminator.state_dict(), 'saved_models/discriminator_%d.pth' % epoch)
 
 if __name__ == "__main__":
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+    if torch.cuda.is_available():
+        os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     main()
