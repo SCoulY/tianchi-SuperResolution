@@ -26,3 +26,8 @@ http://tianchi-media.oss-cn-beijing.aliyuncs.com/231711_youku/round1/train/input
 round1_val_label:<br/>
 http://tianchi-media.oss-cn-beijing.aliyuncs.com/231711_youku/round1/train/label/youku_00150_00199_h_GT.zip<br/>
 
+####################
+2019/5/20
+简单转化为MP4格式，上传到百度网盘
+链接：https://pan.baidu.com/s/1jMx8gRJPHTkKiA6iCdr9AQ 
+提取码：j84p 
