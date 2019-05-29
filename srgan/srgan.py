@@ -38,6 +38,7 @@ parser.add_argument('--hr_width', type=int, default=128, help='size of high res.
 parser.add_argument('--channels', type=int, default=3, help='number of image channels')
 parser.add_argument('--sample_interval', type=int, default=10, help='interval between sampling of images from generators')
 parser.add_argument('--checkpoint_interval', type=int, default=-1, help='interval between model checkpoints')
+parser.add_argument('--parallel', type=bool, default=False, help='use multiple GPUs')
 opt = parser.parse_args()
 
 
@@ -66,6 +67,12 @@ def main():
         feature_extractor = feature_extractor.cuda()
         criterion_GAN = criterion_GAN.cuda()
         criterion_content = criterion_content.cuda()
+
+        if parser.parallel:
+            generator = nn.DataParallel(generator, device_ids=range(torch.cuda.device_count()))
+            discriminator = nn.DataParallel(discriminator, device_ids=range(torch.cuda.device_count()))
+            criterion_GAN = nn.DataParallel(criterion_GAN, device_ids=range(torch.cuda.device_count()))
+            criterion_content = nn.DataParallel(criterion_content, device_ids=range(torch.cuda.device_count()))
 
     if opt.epoch != 0:
         # Load pretrained models
@@ -103,10 +110,12 @@ def main():
     # ----------
     #  Training
     # ----------
-
+    global_G_loss = 100.
+    global_D_loss = 100.
     for epoch in range(opt.epoch, opt.n_epochs):
+        epoch_G_loss = 0. 
+        epoch_D_loss = 0.    
         for i, imgs in enumerate(dataloader):
-
             # Configure model input
             imgs_lr = imgs['lr']
             imgs_hr = imgs['hr']
@@ -164,25 +173,27 @@ def main():
             print("[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]" %
                                                                 (epoch, opt.n_epochs, i, len(dataloader),
                                                                 loss_D.item(), loss_G.item()))
+            epoch_G_loss += loss_G.item()
+            epoch_D_loss += loss_D.item()
+            
+            # batches_done = epoch * len(dataloader) + i
+            # if batches_done % opt.sample_interval == 0:
+            #     # Save image sample
+            #     gen_hr = (gen_hr + 1) / 2 * 255
+            #     imgs_hr= (imgs_hr + 1) / 2 * 255
 
-            batches_done = epoch * len(dataloader) + i
-            if batches_done % opt.sample_interval == 0:
-                # Save image sample
-                gen_hr = (gen_hr + 1) / 2 * 255
-                imgs_hr= (imgs_hr + 1) / 2 * 255
+            #     gen_hr = gen_hr[0].cpu().data.numpy()
+            #     imgs_hr = imgs_hr[0].cpu().data.numpy()
 
-                gen_hr = gen_hr[0].cpu().data.numpy()
-                imgs_hr = imgs_hr[0].cpu().data.numpy()
+            #     gen_hr = np.transpose(gen_hr, axes=(1,2,0))
+            #     imgs_hr = np.transpose(imgs_hr, axes=(1,2,0))
+            #     cv2.imwrite('images/%d_gen.png' % batches_done,gen_hr)
+            #     cv2.imwrite('images/%d_ori.png' % batches_done,imgs_hr)
 
-                gen_hr = np.transpose(gen_hr, axes=(1,2,0))
-                imgs_hr = np.transpose(imgs_hr, axes=(1,2,0))
-                cv2.imwrite('images/%d_gen.png' % batches_done,gen_hr)
-                cv2.imwrite('images/%d_ori.png' % batches_done,imgs_hr)
-
-
-
-        if opt.checkpoint_interval != -1 and epoch % opt.checkpoint_interval == 0:
+        if epoch_D_loss + epoch_G_loss <= global_D_loss + global_G_loss:
             # Save model checkpoints
+            global_D_loss = epoch_D_loss
+            global_G_loss = epoch_G_loss
             torch.save(generator.state_dict(), 'saved_models/generator_%d.pth' % epoch)
             torch.save(discriminator.state_dict(), 'saved_models/discriminator_%d.pth' % epoch)
 
