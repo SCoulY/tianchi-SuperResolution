@@ -27,7 +27,20 @@ round1_val_label:<br/>
 http://tianchi-media.oss-cn-beijing.aliyuncs.com/231711_youku/round1/train/label/youku_00150_00199_h_GT.zip<br/>
 
 ####################<br/>
-2019/5/20<br/>
-简单转化为MP4格式，上传到百度网盘<br/>
-链接：https://pan.baidu.com/s/1jMx8gRJPHTkKiA6iCdr9AQ <br/>
-提取码：j84p 
+2019/6/3<br/>
+简单转化为bmp格式，上传到百度网盘<br/>
+链接：https://pan.baidu.com/s/1y1VbT5GsKIS8CJEO4CWnWQ <br/>
+提取码：emw0  
+
+####################<br/>
+2019/6/3 因为图片过大 模型改成半精度进行训练<br/>
+uploaded latest model trained with automated mixed precision <br/>
+install NVIDIA APEX dependency first (https://github.com/nvidia/apex) <br/>
+$ git clone https://github.com/NVIDIA/apex <br/>
+$ cd apex <br/>
+$ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" . <br/>
+
+####################<br/>
+TODO 用SSIM loss（已上传 但merge进模型）替换原有的criterion_content <br/>
+
+
