@@ -41,6 +41,6 @@ $ cd apex <br/>
 $ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" . <br/>
 
 ####################<br/>
-TODO 用SSIM loss（已上传 但merge进模型）替换原有的criterion_content <br/>
+TODO: 用SSIM loss（已上传 但没merge进模型）替换原有的criterion_content <br/>
 
 
