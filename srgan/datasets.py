@@ -23,7 +23,7 @@ class ImageDataset(Dataset):
         return {'lr': img_lr, 'hr': img_hr}
 
     def __len__(self):
-        return len(self.files)
+        return len(self.lr_files)
 
 if __name__ == "__main__":
     lr_transforms = [   transforms.Resize((270, 480), Image.BICUBIC),

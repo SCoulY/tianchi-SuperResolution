@@ -18,7 +18,7 @@ class FeatureExtractor(nn.Module):
 
         vgg19_model = vgg19(pretrained=True)
 
-        # Extracts features at the 11th layer
+        # Extracts features at the 12th layer
         self.feature_extractor = nn.Sequential(*list(vgg19_model.features.children())[:12])
 
     def forward(self, img):
@@ -106,9 +106,13 @@ class Discriminator(nn.Module):
             in_filters = out_filters
 
         # Output layer
-        layers.append(nn.Conv2d(out_filters, 1, 3, 1, 1))
-
+        layers.append(nn.Conv2d(out_filters, 1, 9, 1))
+        #layers.append(nn.BatchNorm2d(1))
+        #layers.append(nn.LeakyReLU(0.2, inplace=True))
+        layers.append(nn.Sigmoid()) #normalise to (0,1)
         self.model = nn.Sequential(*layers)
 
     def forward(self, img):
-        return self.model(img)
+        out = self.model(img)
+        out = torch.mean(out, dim=(1,2,3))
+        return out # N
