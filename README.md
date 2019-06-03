@@ -42,7 +42,7 @@ $ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--c
 
 ####################<br/>
 TODO 已提issue: 
-1.用SSIM loss（已上传 但没merge进模型）替换原有的criterion_content <br/>
+1.用SSIM loss https://github.com/Po-Hsun-Su/pytorch-ssim（已上传 但没merge进模型）替换原有的criterion_content <br/>
 2.简化模型 或者使用小patch（切片等）降低显存占用 使普通GPU也能训练高分辨率图片 trade off between acc and FLOPs <br/>
 
 
