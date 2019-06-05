@@ -37,7 +37,7 @@ parser.add_argument('--checkpoint', type=int, default=0, help='epoch to start tr
 parser.add_argument('--n_epochs', type=int, default=200, help='number of epochs of training')
 parser.add_argument('--dataset_path', type=str, default="/home/yuankunhao/tianchi/dataset", help='path of the dataset')
 parser.add_argument('--batch_size', type=int, default=4, help='size of the batches')
-parser.add_argument('--lr', type=float, default=0.0002, help='adam: learning rate')
+parser.add_argument('--lr', type=float, default=1e-4, help='adam: learning rate')
 parser.add_argument('--b1', type=float, default=0.5, help='adam: decay of first order momentum of gradient')
 parser.add_argument('--b2', type=float, default=0.999, help='adam: decay of first order momentum of gradient')
 parser.add_argument('--n_cpu', type=int, default=4, help='number of cpu threads to use during batch generation')
@@ -97,8 +97,8 @@ def main():
         optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
         # wrap model to automated mixed precision
-        generator, optimizer_G = amp.initialize(generator, optimizer_G, opt_level="O1")
-        discriminator, optimizer_D = amp.initialize(discriminator, optimizer_D, opt_level="O1")
+        [generator, discriminator], [optimizer_G, optimizer_D] = amp.initialize([generator, discriminator], [optimizer_G, optimizer_D], opt_level="O1", loss_scale='128.0')
+        #discriminator, optimizer_D = amp.initialize(discriminator, optimizer_D, opt_level="O1")
         
         if opt.parallel:
             generator = nn.DataParallel(generator, device_ids=range(torch.cuda.device_count()))
@@ -178,8 +178,8 @@ def main():
 
             # Total loss
             loss_G = torch.mean(loss_content + 1e-3 * loss_GAN)
-            with amp.scale_loss(loss_G, optimizer_G) as scaled_loss:
-                scaled_loss.backward()
+            with amp.scale_loss(loss_G, optimizer_G) as scaled_loss_G:
+                scaled_loss_G.backward()
             optimizer_G.step()
 
             # ---------------------
@@ -196,15 +196,15 @@ def main():
             # Total loss
             loss_D = torch.mean((loss_real + loss_fake) / 2)
 
-            with amp.scale_loss(loss_D, optimizer_D) as scaled_loss:
-                scaled_loss.backward()
+            with amp.scale_loss(loss_D, optimizer_D) as scaled_loss_D:
+                scaled_loss_D.backward()
             optimizer_D.step()
 
 
             # --------------
             #  Log Progress
             # --------------
-            if i == opt.sample_interval:
+            if i % opt.sample_interval == 0:
                 print("[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]" %
                                                                     (epoch, opt.n_epochs, i, len(dataloader),
                                                                     loss_D.item(), loss_G.item()))

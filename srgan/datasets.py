@@ -25,6 +25,22 @@ class ImageDataset(Dataset):
     def __len__(self):
         return len(self.lr_files)
 
+class PredDataset(Dataset):
+    def __init__(self, root, lr_transforms=None):
+        self.lr_transform = transforms.Compose(lr_transforms)
+        self.lr_files = os.listdir(root)
+        self.lr_files = [os.path.join(root, x) for x in self.lr_files]
+        
+    def __getitem__(self, index):
+        img_lr = Image.open(self.lr_files[index])
+        id = self.lr_files[index].split(os.sep)[-1]
+        img_lr = self.lr_transform(img_lr)
+
+        return {'lr': img_lr, 'id': id}
+
+    def __len__(self):
+        return len(self.lr_files)
+
 if __name__ == "__main__":
     lr_transforms = [   transforms.Resize((270, 480), Image.BICUBIC),
                         transforms.ToTensor(),
