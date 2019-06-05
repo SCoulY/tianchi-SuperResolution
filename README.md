@@ -45,4 +45,10 @@ TODO 已提issue:
 1.用SSIM loss（已上传 但没merge进模型）替换原有的criterion_content ref:https://github.com/Po-Hsun-Su/pytorch-ssim<br/>
 2.简化模型 或者使用小patch（切片等）降低显存占用 使普通GPU也能训练高分辨率图片 trade off between acc and FLOPs <br/>
 
+####################<br/>
+2019/6/5<br/>
+upload pretrained model and code for prediction
+链接：https://pan.baidu.com/s/1p-RJg8pgjaf88PNL4P8t7g 
+提取码：o1ew 
+
 
